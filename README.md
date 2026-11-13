@@ -123,7 +123,7 @@ Dockerfiles for the client and the server and a docker compose file are included
 docker compose up --build
 ```
 
-I could not run Docker on my own machine, so these files have not been tested locally.
+I could not run Docker on my laptop, so these files have not been tested locally.
 
 ## Deployment
 
@@ -188,15 +188,15 @@ The app runs as a single Node web service on Render. The React app is built once
 - Dependency auditing with npm audit and Dependabot.
 - Atlas network access is open to all IPs because Render's free plan has no fixed outbound address. The database is still protected by credentials, and a database user with the least privileges needed is the recommended follow up.
 
-## Testing and CI
-
-GitHub Actions runs the CI workflow on every push. There is no automated test suite yet. I tested the REST routes with Postman and the real time flow in the running app.
-
 ## Known Limitations
 
 - A message the server refuses does not show an error to the sender.
 - A user who is not a member of a room sees an empty chat instead of an explanation.
 - Loading, empty and error states are minimal across the interface.
+
+## Testing and CI
+
+GitHub Actions runs the CI workflow on every push. There is no automated test suite yet. I tested the REST routes with Postman and the real time flow in the running app.
 
 ## Roadmap
 
@@ -212,4 +212,4 @@ MIT. See [LICENSE](LICENSE).
 
 ## Author
 
-Md Wahidul Islam ([Stray3rdBorn](https://github.com/Stray3rdBorn)). Website: https://wahidihan.vercel.app
+Md Wahidul Islam ([Stray3rdBorn](https://github.com/Stray3rdBorn)).
