@@ -42,7 +42,7 @@ I built Campfire to get hands on with the web stack: React on the frontend, Expr
 | Database       | MongoDB (Atlas) with Mongoose                                        |
 | Authentication | JWT (jsonwebtoken), bcryptjs                                         |
 | DevOps         | Git and GitHub, GitHub Actions, Docker, Render                       |
-| Tools          | VS Code, Postman                                                     |
+| Tools          | VS Code, Postman, nodemon                                            |
 
 ## How It Works
 
@@ -52,7 +52,7 @@ I built Campfire to get hands on with the web stack: React on the frontend, Expr
 4. **Opening a room.** The browser loads the history over REST, and the server checks membership first. It then opens a Socket.io connection with the token in the handshake, and the server verifies the token before accepting the connection. The browser asks to join the room, and the server checks membership again before adding the connection to it.
 5. **Sending a message.** The browser sends the room ID and the text. The server validates the input, takes the sender from the verified token, saves the message to MongoDB, and broadcasts it to everyone in the room.
 
-In production, Express serves the built client from `client/dist` with a catch all route for React Router, so one service hosts both the API and the interface. In development, the Vite dev server proxies API and socket traffic to the backend. API URLs are relative, so no CORS setup is needed.
+In production, Express serves the built client from `client/dist` with a catch all route for React Router, so one service hosts both the API and the interface. In development, the Vite dev server proxies API and socket traffic to the backend. API URLs are relative, so the app works without CORS.
 
 ## Folder Structure
 
@@ -123,7 +123,7 @@ Dockerfiles for the client and the server and a docker compose file are included
 docker compose up --build
 ```
 
-I could not run Docker on my laptop, so these files have not been tested locally.
+I could not run Docker on my own machine, so these files have not been tested locally.
 
 ## Deployment
 
@@ -180,23 +180,28 @@ The app runs as a single Node web service on Render. The React app is built once
 **Not built yet**
 
 - Rate limiting on login, signup and messages, to slow down brute force and spam.
-- Stricter validation on the REST routes (types, formats, password rules).
-- The same generic error responses on every REST route.
+- Input validation and normalization on the REST routes: field types, email format, case insensitive usernames and emails, and password rules. Until request fields are checked to be plain text, query operators can be injected through login and signup.
+- Generic error responses on every REST route except message history. The other routes still return the raw error text.
 - Security headers with Helmet.
-- Token storage. The JWT sits in localStorage, which any injected script could read. httpOnly cookies would be safer, and there are no refresh tokens or token revocation yet.
+- CORS is currently open to every origin (`cors()` on Express and `origin: "*"` on Socket.io). The client is served from the same origin, so this can be removed or restricted to the deployed domain.
+- Token storage. The JWT sits in localStorage, which any injected script could read. httpOnly cookies would be safer, and there are no refresh tokens or token revocation yet. Logging out only clears the browser, so a token stays valid until it expires.
 - Room IDs work as invitations, and MongoDB IDs are partly predictable. A separate long random invite code is the planned fix.
 - Dependency auditing with npm audit and Dependabot.
 - Atlas network access is open to all IPs because Render's free plan has no fixed outbound address. The database is still protected by credentials, and a database user with the least privileges needed is the recommended follow up.
+
+## Testing and CI
+
+GitHub Actions runs the CI workflow on every push. There is no automated test suite yet. I tested the REST routes with Postman and the real time flow in the running app.
 
 ## Known Limitations
 
 - A message the server refuses does not show an error to the sender.
 - A user who is not a member of a room sees an empty chat instead of an explanation.
 - Loading, empty and error states are minimal across the interface.
-
-## Testing and CI
-
-GitHub Actions runs the CI workflow on every push. There is no automated test suite yet. I tested the REST routes with Postman and the real time flow in the running app.
+- Room actions (create, join, rename, delete) show no message when they fail. Pasting a mistyped room code returns a server error that the interface does not display.
+- An expired login does not send the user back to the login page.
+- Message history loads in full, without pagination.
+- Deleting a room does not disconnect people already inside it.
 
 ## Roadmap
 
